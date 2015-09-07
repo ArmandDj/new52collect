@@ -1,0 +1,102 @@
+<html>
+<head>
+<title>The New 52 Collector</title>
+
+{% load staticfiles %}
+
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"> -->
+<link rel="stylesheet" type="text/css" href="{% static 'content/bootstrap.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'content/dashboard.css' %}" />
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="/content/">New 52 Collector</a>
+		</div>
+		<div>
+			<ul class="nav navbar-nav">
+				<li><a href="/content/browse">Browse</a></li>
+				{% if user.is_authenticated %}
+				<li><a href="/content/collection">Collection</a></li>
+				<li class="active"><a href="/content/reading">Reading List</a></li>
+				{% else %}
+				<li><a href="/content/login">Collection</a></li>
+				<li><a href="/content/login">Reading List</a></li>
+				{% endif %}
+			</ul>
+		</div>
+		{% if user.is_authenticated %}
+		<form class="navbar-form navbar-right" action="{% url 'content:account_request' 'logout' %}">
+	        <button type="submit" class="btn btn-danger">Logout</button>
+	    </form>
+		{% else %}
+		<form class="navbar-form navbar-right" style="padding-left: 0px" action="/content/register">
+		    <button type="submit" class="btn btn-success">Sign Up</button>
+		</form>
+		<form class="navbar-form navbar-right" style="padding-right: 10px" action="{% url 'content:account_request' 'login' %}" method="post">
+			{% csrf_token %}
+	        <div class="form-group">
+	           	<input type="text" placeholder="username" name="username" class="form-control">
+	        </div>
+	        <div class="form-group">
+	            <input type="password" placeholder="password" name="password" class="form-control">
+	        </div>
+	        <button type="submit" class="btn btn-primary">Login</button>
+	    </form>
+	    {% endif %}
+	</div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <div class="main" style="width: 60%; margin: 0 auto">
+<!-- <div id="page" class="container">
+	<div>
+		<div> -->
+		<h1 class="page-header">Reading List</h1>
+			<div class="list-group">
+				<li id="exp{{forloop.counter}}" class="list-group-item active" style="text-align: left">
+					<a href="#" class="list-group-item active" style="display: inline"></a>
+				</li>
+				<!-- <ul class="list-group"> -->
+				{% for issue in reading_list %}
+				<li class="list-group-item" style="text-align: left">
+					<div style="display: inline-block;">
+						{% if forloop.first %}
+						<form style="display: block; margin: 0 5;" action="#">
+						{% else %}
+						<form style="display: block; margin: 0 5;" action="{% url 'content:ownership' issue.series issue.issue_num 'decrementpriority' %}" method="post">
+						{% endif %}
+		            	{% csrf_token %}
+			        		<input type="image" src="{% static 'arrows/up-resized.png' %}" alt="up" height="15" width="15">
+			        	</form>
+			        	{% if forloop.counter == length %}
+						<form style="display: block; margin: 0 5" action="#">
+						{% else %}
+						<form style="display: block; margin: 0 5" action="{% url 'content:ownership' issue.series issue.issue_num 'incrementpriority' %}" method="post">
+						{% endif %}
+		            	{% csrf_token %}
+			        		<input type="image" src="{% static 'arrows/down-resized.png' %}" alt="down" height="15" width="15">
+			        	</form>
+					</div>
+					<div style="display: inline-block; width: 80%; position: relative; top: 50%; transform: translateY(-40%);">
+						<a href="/content/comic/{{issue.series}}/{{issue.issue_num}}">{{ issue.series }} #{{ issue.issue_num }} - {{ issue.title }}</a>
+					</div>
+					<form style="display: inline-block; height: 15px; position: relative; top: 50%; transform: translateY(-40%);" action="{% url 'content:ownership' issue.series issue.issue_num 'readingremove' %}" method="post">
+		            	{% csrf_token %}
+			        	<button type="submit" class="btn btn-danger btn-sm">remove</button>
+			        </form>
+			        <form style="display: inline-block; height: 15px; position: relative; top: 50%; transform: translateY(-40%);" action="{% url 'content:ownership' issue.series issue.issue_num 'readingtoggleread' %}" method="post">
+		            	{% csrf_token %}
+			        		<button type="submit" class="btn btn-success btn-sm">mark as read</button>
+			        </form>
+				</li>
+				{% endfor %}
+				<!-- </ul> -->
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+
+</html>
